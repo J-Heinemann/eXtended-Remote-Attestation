@@ -1,0 +1,1 @@
+pdflatex -interaction=nonstopmode --shell-escape pr_faas_xra.tex

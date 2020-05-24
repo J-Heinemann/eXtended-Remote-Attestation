@@ -1,0 +1,13 @@
+cmake_minimum_required (VERSION 2.8)
+enable_language(ASM_NASM)
+set(CMAKE_ASM_NASM_FLAGS "-felf64")
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> <INCLUDES> <FLAGS> -o <OBJECT> <SOURCE>")
+set(XRA_DIR ${CMAKE_CURRENT_LIST_DIR})
+include_directories(include /opt/intel/sgxsdk/include)
+
+file(GLOB source_asm_t ${XRA_DIR}/src/*_t.asm)
+file(GLOB source_c_t ${XRA_DIR}/src/*_t.c)
+set_source_files_properties(${source_asm_t} PROPERTIES LANGUAGE ASM_NASM)
+set(XRA_SOURCE_T ${source_asm_t} ${source_c_t})
+add_definitions(-DXRA_DEBUG=1)
+add_library(XRA_t ${XRA_SOURCE_T})

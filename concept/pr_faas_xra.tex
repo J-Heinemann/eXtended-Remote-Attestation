@@ -1,0 +1,186 @@
+% Offizielle Beispieldatei für beamer-Vorlage aus tubslatex Version 0.3beta2
+\documentclass[fleqn,11pt,aspectratio=169]{beamer}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage[cache=false]{minted}
+\usepackage{pgfplots}
+\usepackage{amssymb}
+%\usepackage{enumitem}
+\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+\usetheme[%
+  nexus,%        Nexus Fonts benutzen
+  %lnum,%         Versalziffern verwenden
+  %cmyk,%<rgbprint>,          Auswahl des Farbmodells
+  blue,%<orange/green/violet> Auswahl des Sekundärfarbklangs
+  dark,%<light,medium>        Auswahl der Helligkeit
+  %colorhead,%    Farbig hinterlegte Kopfleiste
+  %colorfoot,%    Farbig hinterlegt Fußleiste auf Titelseite
+  colorblocks,%   Blöcke Farbig hinterlegen
+  %nopagenum,%    Keine Seitennumer in Fußzeile
+  %nodate,%       Kein Datum in Fußleiste
+  tocinheader,%   Inhaltsverzeichnis in Kopfleiste
+  %tinytocinheader,% kleines Kopfleisten-Inhaltsverzeichnis
+  %widetoc,%      breites Kopfleisten-Inhaltsverzeichnis
+  %narrowtoc,%    schmales Kopfleisten-Inhaltsverzeichnis
+  %nosubsectionsinheader,%  Keine subsections im Kopfleisten-Inhaltsverzeichnis
+  %nologoinfoot,% Kein Logo im Fußbereich darstellen
+  ]{tubs}
+
+% Titelseite
+\title{FaaS\_XRA: A highly customizable remote attestation framework for Intel SGX}
+\subtitle{Project Thesis'20: TFaaS - First Draft}
+\author{Joshua Heinemann}
+% Titelgrafik, automatisch beschnitten, Weitere Optionen: <scaled/cropx/cropy>
+% \titlegraphic[cropped]{\includegraphics{infozentrum.jpg}}
+\titlegraphic[scaled]{\includegraphics{titlepicture.jpg}}
+
+% Logo, dass auf Titelseiten oben rechts und auf Inthaltsseiten unten rechts
+% dargestellt wird. Es wird jeweils automatisch skliert
+\logo{\includegraphics{ibr_de.pdf}}
+%\logo{Institut für Betriebssysteme und Rechnerverbunde}
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+\makeatletter
+\newbox\@backgroundblock
+\newenvironment{backgroundblock}[2]{%
+  \global\setbox\@backgroundblock=\vbox\bgroup%
+    \unvbox\@backgroundblock%
+    \vbox to0pt\bgroup\vskip#2\hbox to0pt\bgroup\hskip#1\relax%
+}{\egroup\egroup\egroup}
+\addtobeamertemplate{background}{\box\@backgroundblock}{}
+\makeatother
+
+\begin{document}
+
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+\section{FaaS eXtended Remote Attestation}
+\subsection{Goals}
+\begin{frame}{FaaS\_XRA - Goals}
+FaaS eXtended Remote Attestation:
+\begin{itemize}
+	\item[+] Highly customizable
+	\begin{itemize}
+		\item Only measure desired features
+	\end{itemize}
+	\item[+] offers an interface that is self-explanatory
+	\item[+] Fast
+	\item[+] Low resource consumption
+	\begin{itemize}
+		\item CPU time as well as memory usage
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Concept}
+\begin{frame}[fragile]{FaaS\_XRA - Concept}
+Concept:
+\begin{itemize}
+	\item User enables all desired measurements
+	\begin{itemize}
+		\item e.g. \texttt{XRA\_CIPHER}, \texttt{XRA\_WASM\_CODE}
+	\end{itemize}\\
+	$\rightarrow$ Highly customizable
+	\item \textit{Static features} will be measured during framework bootstrap
+	\item \textit{Dynamic features} will be measured by invocation of \texttt{xra\_gen\_report}
+\end{itemize}
+Example:
+\vspace{-0.5cm}
+\begin{figure}[H]
+\centering
+\begin{minted}[frame=lines,linenos,fontsize=\small]{c}
+...
+xra_status_t status;
+if((status = xra_init(XRA_CIPHER|XRA_WASM_CODE|XRA_CUSTOM)) != XRA_SUCCESS)
+	goto fail;
+if((status = xra_reg_wasm_code((void*)wasm_binary, sizeof(wasm_binary)))
+ != XRA_SUCCESS)
+	goto fail;
+\end{minted}
+\end{figure}
+\end{frame}
+
+\subsection{Measurable Features}
+\begin{frame}{FaaS\_XRA - Measurable Features}
+\textit{Static features}:
+\begin{itemize}
+	\item Enclave features
+	\item WAMR features
+	\begin{itemize}
+		\item Runtime-specific features e.g. \textit{heap-size}
+		\item Native functions
+	\end{itemize}
+\end{itemize}
+\textit{Dynamic features}:
+\begin{itemize}
+	\item WASM application code
+	\item Cipher used for encryption of the WASM application code
+\end{itemize}
+\end{frame}
+
+\subsection{Report}
+\begin{frame}[fragile]{FaaS\_XRA - Report}
+\begin{columns}
+\hspace{.25cm}
+\begin{column}{7cm}
+Report consists of:
+\begin{itemize}
+        \item Measured features
+        \item Custom field
+        \begin{itemize}
+                \item Stores user-specific content
+                \item e.g. Comments or Keys
+        \end{itemize}
+\end{itemize}
+Report process:
+\begin{itemize}
+        \item[1] Measure all features
+        \item[2] Generate \texttt{xra\_report\_t}
+        \item[3] Calculate \texttt{xra\_report\_t}'s hash sum
+        \item[4] Generate \texttt{sgx\_report\_t} and use the \\
+	hash sum as \texttt{sgx\_report\_data\_t}
+        \item[5] Return both reports
+\end{itemize}
+\end{column}
+\hspace{-0.4cm}
+\begin{column}{8cm}
+\begin{figure}[H]
+\vspace{-0.5cm}
+Example:
+\vspace{-0.4cm}
+\centering
+\begin{minted}[frame=lines,linenos,fontsize=\small]{c}
+//All features are already registered
+...
+xra_status_t status;
+sgx_status_t stat;
+xra_report_t* xra_report;
+sgx_status_t* sgx_report;
+sgx_target_info_t target;
+if((stat = sgx_self_target(&target)) != 
+   SGX_SUCCESS)
+	goto fail;
+if((status = xra_gen_report(&target, 
+   &xra_report, &sgx_report)) != XRA_SUCCESS)
+	goto fail; 
+...
+\end{minted}
+\end{figure}
+\end{column}
+\end{columns}
+\end{frame}
+\end{document}
