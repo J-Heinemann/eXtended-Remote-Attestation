@@ -1,0 +1,20 @@
+#
+# Created by Joshua Heinemann on 28.07.20.
+# TU-Braunschweig (heineman@ibr.cs.tu-bs.de)
+#
+cmake_minimum_required(VERSION 3.8.0)
+project("eXtended Remote Attestation")
+enable_language(ASM_NASM)
+set(CMAKE_ASM_NASM_FLAGS -felf64)
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> <INCLUDES> ${CMAKE_ASM_NASM_FLAGS} -o <OBJECT> <SOURCE>")
+set(SGX_SDK_PATH /opt/intel/sgxsdk)
+set(XRA_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/include)
+#file(GLOB XRA_UNTRUSTED_SRC_ASM X.S)
+#set_source_files_properties(${XRA_UNTRUSTED_SRC_ASM } PROPERTIES LANGUAGE ASM_NASM)
+set(XRA_ENCLAVE_SRC_C src/core.c)
+#set(XRA_UNTRUSTED_SRC_C)
+message("-- eXtended Remote Attestation Configuration:")
+add_library(xra_t STATIC ${XRA_ENCLAVE_SRC_C})
+target_include_directories(xra_t PRIVATE ${XRA_INCLUDE_PATH} ${SGX_SDK_PATH}/include ${SGX_SDK_PATH}/include/tlibc)
+target_compile_options(xra_t PRIVATE -O3)
+#add_library(xra_u static ${XRA_UNTRUSTED_SRC_C})
