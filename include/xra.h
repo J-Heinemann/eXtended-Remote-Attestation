@@ -15,6 +15,11 @@ typedef struct _report{
     sgx_report_data_t report_data;
 }xra_report_t;
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 xra_status_t xra_create_report(const sgx_target_info_t* target_info, const sgx_report_data_t* report_data, xra_report_t* xra_report, sgx_report_t* sgx_report);
-
+#ifdef __cplusplus
+};
+#endif
 #endif //FAASM_XRA_H
