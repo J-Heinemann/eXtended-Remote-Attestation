@@ -17,5 +17,5 @@ typedef enum _xra_error{
 }xra_status_t;
 #define XRA_SET_SGX_ERROR(XRA_ERROR,SGX_ERROR) (xra_status_t) (SGX_ERROR << 16|XRA_ERROR)
 #define XRA_GET_XRA_ERROR(X) (X & 0x0000FFFF)
-#define XRA_GET_SGX_ERROR(X) (X & 0xFFFF0000)
+#define XRA_GET_SGX_ERROR(X) ((X & 0xFFFF0000) >> 16)
 #endif //FAASM_XRA_ERROR_H
