@@ -14,12 +14,13 @@
 
 typedef struct _xra_report{
     uint8_t wasm_opcode_hash[SGX_SHA256_HASH_SIZE];
+    uint8_t whitelist_hash[SGX_SHA256_HASH_SIZE];
 }xra_report_t;
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-xra_status_t xra_create_report(const uint8_t* wasm_opcode_ptr, uint32_t wasm_opcode_len, xra_report_t* xra_report_ptr);
+xra_status_t xra_create_report(const uint8_t* wasm_opcode_ptr, uint32_t wasm_opcode_len, const uint8_t* whitelist_ptr, xra_report_t* xra_report_ptr);
 #ifdef __cplusplus
 };
 #endif
